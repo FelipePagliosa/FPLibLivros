@@ -44,38 +44,11 @@ builder.Services.AddControllers()
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "LibraryLivros.API", Version = "v1" });
-    c.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme()
-    {
-        Type = SecuritySchemeType.ApiKey,
-        In = ParameterLocation.Header,
-        Name = "API Key",
-        Description = "Chave necessária para acesso aos endpoints",
-    });
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "ApiKey" }
-            },
-            new string[] { }
-        }
-    });
-});
 
 var app = builder.Build();
 
 app.UseMiddleware<ApiKeyMiddleware>();
 
-// Configure the HTTP request pipeline.
-// if (app.Environment.IsDevelopment())
-// {
-app.UseSwagger();
-app.UseSwaggerUI();
-//}
 
 app.UseHttpsRedirection();
 
