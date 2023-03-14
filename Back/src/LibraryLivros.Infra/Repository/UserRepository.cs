@@ -20,4 +20,9 @@ public class UserRepository : BaseRepository<User>, IUserRepository
     {
         return await _context.User.ToListAsync();
     }
+
+    public async Task<User> GetUserByIdGatewayAsync(int idUserGateway)
+    {
+        return await _context.User.Where(x => x.Id == idUserGateway).FirstOrDefaultAsync();
+    }
 }

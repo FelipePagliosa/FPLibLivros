@@ -27,6 +27,24 @@ public class LivroController : ControllerBase
         return Ok(await _livroService.GetAll());
     }
 
+    [HttpPost("filter")]
+    public async Task<IActionResult> GetByFilter(LivroFilter filter)
+    {
+        try
+        {
+            var livros = _livroService.GetLivrosByFilter(filter).Result;
+            return Ok(livros);
+        }
+        catch (LibraryLivrosExceptions e)
+        {
+            return new JsonResult(new { message = e.Message }) { StatusCode = StatusCodes.Status400BadRequest };
+        }
+        catch (Exception e)
+        {
+            return new JsonResult(new { message = e.Message }) { StatusCode = StatusCodes.Status500InternalServerError };
+        }
+    }
+
     [HttpPost]
     public async Task<IActionResult> Post(LivroInsertRequest request)
     {
@@ -46,6 +64,44 @@ public class LivroController : ControllerBase
 
     }
 
+    //link livro to user
+    [HttpPost("link")]
+    public async Task<IActionResult> LinkLivroToUser(LivroLinkRequest request)
+    {
+        try
+        {
+            await _livroService.LinkLivroToUser(request);
+            return Ok();
+        }
+        catch (LibraryLivrosExceptions e)
+        {
+            return new JsonResult(new { message = e.Message }) { StatusCode = StatusCodes.Status400BadRequest };
+        }
+        catch (Exception e)
+        {
+            return new JsonResult(new { message = e.Message }) { StatusCode = StatusCodes.Status500InternalServerError };
+        }
+    }
+
+
+    [HttpPost("user")]
+    public async Task<IActionResult> GetLivrosByUser(LivroByUserRequest request)
+    {
+        try
+        {
+            var livros = await _livroService.GetLivrosByUser(request.IdUser);
+            return Ok(livros);
+        }
+        catch (LibraryLivrosExceptions e)
+        {
+            return new JsonResult(new { message = e.Message }) { StatusCode = StatusCodes.Status400BadRequest };
+        }
+        catch (Exception e)
+        {
+            return new JsonResult(new { message = e.Message }) { StatusCode = StatusCodes.Status500InternalServerError };
+        }
+    }
+
     [HttpPut]
     public async Task<IActionResult> Put(LivroUpdateRequest request)
     {
@@ -54,7 +110,6 @@ public class LivroController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Roles = nameof(Perfil.Medico))]
     public async Task<IActionResult> Delete(int id)
     {
         await _livroService.Delete(id);

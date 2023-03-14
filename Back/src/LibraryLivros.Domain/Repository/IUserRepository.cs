@@ -6,4 +6,5 @@ public interface IUserRepository : IBaseRepository<User>
 {
     Task<List<User>> GetUsersAsync();
     Task<User> GetUserByIdAsync(int id);
+    Task<User> GetUserByIdGatewayAsync(int idUserGateway);
 }

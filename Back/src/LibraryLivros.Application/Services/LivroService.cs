@@ -54,6 +54,48 @@ public class LivroService : ILivroService
         await _unitOfWork.CommitarAsync();
     }
 
+    //link livro to user 
+    public async Task LinkLivroToUser(LivroLinkRequest livroLinkRequest)
+    {
+        var existente = await _unitOfWork.LivroRepository.GetLivroByIdAsync(livroLinkRequest.IdLivro);
+        var existenteUser = await _unitOfWork.UserRepository.GetUserByIdGatewayAsync(livroLinkRequest.IdUser);
+
+        //create user if it doesn't exist 
+        if (livroLinkRequest.IdUser == 0 || existenteUser == null){
+            _unitOfWork.Iniciar();
+
+            var user = new User();
+            user.Id = livroLinkRequest.IdUser;
+            _unitOfWork.UserRepository.Add(user);
+            await _unitOfWork.CommitarAsync();
+
+            existenteUser = await _unitOfWork.UserRepository.GetUserByIdGatewayAsync(livroLinkRequest.IdUser);
+        }
+
+        if (livroLinkRequest.IdLivro == 0 || existente == null || existenteUser == null ){
+            return;
+        }
+
+        _unitOfWork.Iniciar();
+
+        existente.Users.Add(existenteUser);
+
+        _unitOfWork.LivroRepository.Update(existente);
+        await _unitOfWork.CommitarAsync();
+    }
+
+    //check all books from a user
+    public async Task<List<Livro>> GetLivrosByUser(int userId)
+    {
+        var existenteUser = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+
+        if (existenteUser == null){
+            return null;
+        }
+
+        return await _unitOfWork.LivroRepository.GetLivrosByUserAsync(userId);
+    }
+
     public async Task Delete(int livroId)
     {
 
@@ -76,5 +118,10 @@ public class LivroService : ILivroService
     public async Task<List<Livro>> GetAll()
     {
         return await _unitOfWork.LivroRepository.GetLivrosAsync();
+    }
+
+    public async Task<List<Livro>> GetLivrosByFilter(LivroFilter filtro)
+    {
+        return await _unitOfWork.LivroRepository.GetLivrosByFilterAsync(filtro);
     }
 }
